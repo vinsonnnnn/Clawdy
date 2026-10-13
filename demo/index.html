@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="zh-CN">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Clawdy · 像素智能拍档</title>
+<style>
+:root{font:16px/1.6 system-ui,sans-serif;color:#433b33;background:#f4efe7}*{box-sizing:border-box}body{margin:0;padding:32px 20px}main{max-width:960px;margin:auto}h1{font-size:clamp(32px,6vw,56px);margin:0}p{color:#756a5d}a{color:#a44c22}header{margin-bottom:24px}.panel{border:1px solid #d9cfc0;border-radius:22px;background:#fffaf2;padding:24px}.stage{height:400px;position:relative;overflow:hidden;border-radius:14px;background:radial-gradient(ellipse at center,#fffaf2,#eae0d0);display:grid;place-items:center;touch-action:none}canvas{width:288px;height:312px;image-rendering:pixelated;max-width:100%;object-fit:contain}.controls{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:18px}button,select{font:inherit;border:1px solid #cbbca9;border-radius:9px;background:#fffaf2;color:#433b33;padding:8px 12px}button{cursor:pointer}button:focus-visible,select:focus-visible,input:focus-visible{outline:3px solid #e27c3c}label{display:flex;align-items:center;gap:7px}output{display:block;min-height:26px;margin-top:10px;color:#8b572e}.caption{font-size:14px}footer{margin-top:24px;font-size:14px;color:#756a5d}@media(max-width:520px){body{padding:20px 12px}.panel{padding:14px}.stage{height:340px}}
+</style>
+<main>
+<header><h1>Clawdy<span style="color:#d7763d">.</span></h1><p>九种动作，十六个张望方向。一个陪你写代码的暖橙色小伙伴。</p><a href="https://chatgpt.com/s/sharepet_6acdf49f9adc8191be520acad84372b8" target="_blank" rel="noopener">在 ChatGPT 中领养 ↗</a></header>
+<section class="panel">
+<div class="stage" id="stage"><canvas id="pet" width="192" height="208" role="img" aria-label="Clawdy 像素宠物动画"></canvas></div>
+<div class="controls">
+<label>动作 <select id="state"><option value="idle">待机 · 眨眼</option><option value="running-right">向右移动</option><option value="running-left">向左移动</option><option value="waving">挥手</option><option value="jumping">跳跃</option><option value="failed">遇到问题</option><option value="waiting">等待</option><option value="running">思考与处理</option><option value="review">检查结果</option></select></label>
+<button id="pause" type="button">暂停动画</button>
+<label><input id="follow" type="checkbox" checked>视线跟随</label>
+<label>大小 <input id="size" type="range" min="0.75" max="1.75" step="0.25" value="1.5" aria-label="宠物显示倍数"></label>
+</div>
+<output id="status" aria-live="polite">正在载入素材…</output>
+<p class="caption">在预览区域移动鼠标或触摸拖动，它会朝你张望；离开区域后播放所选动作。靠近画布中心时回到待机。使用下拉框可通过键盘切换动作。</p>
+</section>
+<footer>独立社区创作 · Claude Code 风格灵感 · <a href="../README.md">项目说明</a> · <a href="../assets/clawdy-v2.png" download>下载精灵图</a></footer>
+</main>
+<script>
+'use strict';
+// Same durations as pet.json; inline data keeps this demo usable with file://.
+const animations={idle:{row:0,d:[280,110,110,140,140,320]},'running-right':{row:1,d:[120,120,120,120,120,120,120,220]},'running-left':{row:2,d:[120,120,120,120,120,120,120,220]},waving:{row:3,d:[140,140,140,280]},jumping:{row:4,d:[140,140,140,140,280]},failed:{row:5,d:[140,140,140,140,140,140,140,240]},waiting:{row:6,d:[150,150,150,150,150,260]},running:{row:7,d:[120,120,120,120,120,220]},review:{row:8,d:[150,150,150,150,150,280]}};
+const stage=document.getElementById('stage'),canvas=document.getElementById('pet'),ctx=canvas.getContext('2d');
+const select=document.getElementById('state'),follow=document.getElementById('follow'),pause=document.getElementById('pause'),status=document.getElementById('status');
+const sheet=new Image();let ready=false,frame=0,elapsed=0,last=null,pointer=null,wasLooking=false;
+let paused=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+pause.textContent=paused?'播放动画':'暂停动画';
+function draw(row,col){ctx.clearRect(0,0,192,208);ctx.imageSmoothingEnabled=false;ctx.drawImage(sheet,col*192,row*208,192,208,0,0,192,208)}
+function label(text){if(status.textContent!==text)status.textContent=text}
+function reset(){frame=0;elapsed=0;last=null}
+select.addEventListener('change',()=>{reset();pointer=null});
+pause.addEventListener('click',()=>{paused=!paused;pause.textContent=paused?'播放动画':'暂停动画';last=null});
+follow.addEventListener('change',()=>{pointer=null;reset()});
+document.getElementById('size').addEventListener('input',e=>{canvas.style.width=192*Number(e.target.value)+'px';canvas.style.height=208*Number(e.target.value)+'px'});
+stage.addEventListener('pointermove',e=>{pointer={x:e.clientX,y:e.clientY}});
+stage.addEventListener('pointerleave',()=>{pointer=null;reset()});
+stage.addEventListener('pointerup',e=>{if(e.pointerType!=='mouse'){pointer=null;reset()}});
+stage.addEventListener('pointercancel',()=>{pointer=null;reset()});
+function tick(now){
+ const delta=last===null?0:Math.min(now-last,100);last=now;
+ if(ready){
+  let looking=follow.checked&&pointer!==null;
+  if(looking){
+   const r=canvas.getBoundingClientRect(),dx=pointer.x-(r.left+r.width/2),dy=pointer.y-(r.top+r.height/2);
+   if(Math.hypot(dx,dy)<24){draw(0,0);label('中心区域 · 待机')}
+   else {const deg=(Math.atan2(dx,-dy)*180/Math.PI+360)%360,index=Math.round(deg/22.5)%16;draw(9+Math.floor(index/8),index%8);label('张望 · '+(index*22.5)+'°')}
+  }else{
+   if(wasLooking)reset();const a=animations[select.value];
+   if(!paused){elapsed+=delta;while(elapsed>=a.d[frame]){elapsed-=a.d[frame];frame=(frame+1)%a.d.length}}
+   draw(a.row,frame);label(select.options[select.selectedIndex].text+(paused?' · 已暂停':''));
+  }
+  wasLooking=looking;
+ }
+ requestAnimationFrame(tick);
+}
+sheet.onload=()=>{ready=true;reset()};sheet.onerror=()=>label('素材载入失败，请保留 demo 与 assets 的相对目录位置。');
+sheet.src='../assets/clawdy-v2.png';requestAnimationFrame(tick);
+</script>
+</html>

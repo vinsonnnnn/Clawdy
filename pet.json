@@ -1,0 +1,166 @@
+{
+  "name": "Clawdy",
+  "version": "1.0.0",
+  "spriteVersionNumber": 2,
+  "description": "Claude Code 风格的暖橙色像素智能拍档：九种动作，十六方向视线跟随。",
+  "spritesheet": "assets/clawdy-v2.png",
+  "shareUrl": "https://chatgpt.com/s/sharepet_6acdf49f9adc8191be520acad84372b8",
+  "atlas": {
+    "width": 1536,
+    "height": 2288,
+    "columns": 8,
+    "rows": 11,
+    "cellWidth": 192,
+    "cellHeight": 208
+  },
+  "animations": {
+    "idle": {
+      "row": 0,
+      "frames": 6,
+      "durationsMs": [
+        280,
+        110,
+        110,
+        140,
+        140,
+        320
+      ],
+      "description": "待机：呼吸与眨眼"
+    },
+    "running-right": {
+      "row": 1,
+      "frames": 8,
+      "durationsMs": [
+        120,
+        120,
+        120,
+        120,
+        120,
+        120,
+        120,
+        220
+      ],
+      "description": "向右移动"
+    },
+    "running-left": {
+      "row": 2,
+      "frames": 8,
+      "durationsMs": [
+        120,
+        120,
+        120,
+        120,
+        120,
+        120,
+        120,
+        220
+      ],
+      "description": "向左移动"
+    },
+    "waving": {
+      "row": 3,
+      "frames": 4,
+      "durationsMs": [
+        140,
+        140,
+        140,
+        280
+      ],
+      "description": "挥手打招呼"
+    },
+    "jumping": {
+      "row": 4,
+      "frames": 5,
+      "durationsMs": [
+        140,
+        140,
+        140,
+        140,
+        280
+      ],
+      "description": "跳跃"
+    },
+    "failed": {
+      "row": 5,
+      "frames": 8,
+      "durationsMs": [
+        140,
+        140,
+        140,
+        140,
+        140,
+        140,
+        140,
+        240
+      ],
+      "description": "遇到问题时沮丧"
+    },
+    "waiting": {
+      "row": 6,
+      "frames": 6,
+      "durationsMs": [
+        150,
+        150,
+        150,
+        150,
+        150,
+        260
+      ],
+      "description": "等待输入或确认"
+    },
+    "running": {
+      "row": 7,
+      "frames": 6,
+      "durationsMs": [
+        120,
+        120,
+        120,
+        120,
+        120,
+        220
+      ],
+      "description": "思考与处理任务"
+    },
+    "review": {
+      "row": 8,
+      "frames": 6,
+      "durationsMs": [
+        150,
+        150,
+        150,
+        150,
+        150,
+        280
+      ],
+      "description": "检查完成的结果"
+    }
+  },
+  "look": {
+    "rows": [
+      9,
+      10
+    ],
+    "anglesDegrees": [
+      0.0,
+      22.5,
+      45.0,
+      67.5,
+      90.0,
+      112.5,
+      135.0,
+      157.5,
+      180.0,
+      202.5,
+      225.0,
+      247.5,
+      270.0,
+      292.5,
+      315.0,
+      337.5
+    ],
+    "zero": "up",
+    "positive": "clockwise",
+    "deadzoneBehavior": "idle"
+  },
+  "sha256": "34ec907ff7fc13e49cbdeec7d4529d3506ba0f1d0227baa85cba8cf1907c87d3"
+}
